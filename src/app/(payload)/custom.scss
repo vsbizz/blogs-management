@@ -1,0 +1,547 @@
+/*
+  IGG Axion admin theme.
+
+  Loaded with the admin layout, so these rules apply before first paint. The
+  components that used to inject <style> tags on mount and scrape the DOM with a
+  MutationObserver have been removed in favour of this file.
+
+  Palette matches the marketing site (src/app/globals.css there) so the CMS and
+  the public site read as one product.
+*/
+
+:root {
+  --igg-navy: #161f48;
+  --igg-navy-dark: #0f1d47;
+  --igg-navy-mid: #253c82;
+  --igg-teal: #00a499;
+  --igg-teal-dark: #007d74;
+  --igg-gold: #d2a047;
+  --igg-gold-dark: #a8821e;
+
+  --igg-ink: #0f172a;
+  --igg-muted: #64748b;
+  --igg-line: #e2e8f0;
+  --igg-surface: #ffffff;
+  --igg-canvas: #f6f8fb;
+
+  --igg-radius: 10px;
+  --igg-shadow-sm: 0 1px 2px rgb(15 23 42 / 6%);
+  --igg-shadow-md: 0 6px 24px rgb(15 23 42 / 8%);
+  --igg-shadow-lg: 0 18px 50px rgb(15 23 42 / 12%);
+
+  /* Payload theme variables, remapped to the brand. */
+  --theme-elevation-0: #ffffff;
+  --theme-success-500: var(--igg-teal);
+  --color-success-500: var(--igg-teal);
+}
+
+/* Light only: the palette above is built for light backgrounds. */
+[data-theme='dark'] {
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------------ *
+ * Chrome we deliberately hide
+ * ------------------------------------------------------------------ */
+
+/* Internal document IDs mean nothing to an editor. */
+.id-label {
+  display: none !important;
+}
+
+/*
+  The Cloudinary plugin adds a read-only "Cloudinary Media Information" group.
+  Uploads work without it and the raw payload only confuses editors.
+*/
+#field-cloudinary,
+[data-path='cloudinary'],
+[data-field-name='cloudinary'] {
+  display: none !important;
+}
+
+/* Theme switcher: the admin is intentionally light-only. */
+.payload-settings__appearance,
+.payload__theme-selector {
+  display: none !important;
+}
+
+/* Payload's built-in forgot-password route; we ship our own at /forgot-password. */
+a[href='/admin/forgot'] {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------ *
+ * Login
+ * ------------------------------------------------------------------ */
+
+.login {
+  background:
+    radial-gradient(circle at 15% 15%, rgb(0 164 153 / 12%), transparent 42%),
+    radial-gradient(circle at 85% 12%, rgb(210 160 71 / 14%), transparent 44%),
+    var(--igg-canvas);
+
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 26px;
+    text-align: center;
+  }
+
+  &__brand-logo {
+    height: 54px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__brand-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--igg-navy);
+  }
+
+  &__brand-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--igg-muted);
+  }
+
+  .form-submit .btn {
+    width: 100%;
+    justify-content: center;
+    background: var(--igg-navy);
+    border-color: var(--igg-navy);
+
+    &:hover {
+      background: var(--igg-navy-mid);
+      border-color: var(--igg-navy-mid);
+    }
+  }
+
+  &__secondary {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--igg-line);
+    text-align: center;
+  }
+
+  &__secondary-link {
+    font-size: 13px;
+    color: var(--igg-muted);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--igg-teal-dark);
+      text-decoration: underline;
+    }
+  }
+
+  &__secondary-note {
+    margin: 10px 0 0;
+    font-size: 13px;
+    color: var(--igg-muted);
+
+    a {
+      font-weight: 600;
+      color: var(--igg-navy);
+      text-decoration: none;
+      border-bottom: 1px solid currentcolor;
+
+      &:hover {
+        color: var(--igg-teal-dark);
+      }
+    }
+  }
+}
+
+/* The panel Payload centres on the login screen. */
+.login .form-wrap,
+.login__wrap {
+  padding: 34px 32px;
+  background: var(--igg-surface);
+  border: 1px solid var(--igg-line);
+  border-radius: 16px;
+  box-shadow: var(--igg-shadow-lg);
+}
+
+/* ------------------------------------------------------------------ *
+ * Navigation
+ * ------------------------------------------------------------------ */
+
+.nav {
+  background: var(--igg-navy);
+
+  a,
+  .nav-group__toggle {
+    color: rgb(255 255 255 / 78%);
+  }
+
+  .nav__link:hover,
+  a:hover {
+    color: #ffffff;
+    background: rgb(255 255 255 / 8%);
+  }
+
+  .nav__link--active,
+  a.active {
+    color: #ffffff;
+    background: rgb(0 164 153 / 22%);
+    box-shadow: inset 3px 0 0 var(--igg-teal);
+  }
+
+  .nav-group__label {
+    color: rgb(255 255 255 / 45%);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Buttons
+ * ------------------------------------------------------------------ */
+
+.btn--style-primary {
+  background: var(--igg-navy);
+  border-color: var(--igg-navy);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--igg-navy-mid);
+    border-color: var(--igg-navy-mid);
+  }
+}
+
+.btn--style-secondary {
+  border-color: var(--igg-line);
+  color: var(--igg-ink);
+
+  &:hover {
+    border-color: var(--igg-navy);
+    color: var(--igg-navy);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Tables, cards and forms
+ * ------------------------------------------------------------------ */
+
+.table {
+  border: 1px solid var(--igg-line);
+  border-radius: var(--igg-radius);
+  overflow: hidden;
+  box-shadow: var(--igg-shadow-sm);
+
+  thead th {
+    background: var(--igg-canvas);
+    color: var(--igg-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  tbody tr:hover {
+    background: rgb(0 164 153 / 4%);
+  }
+}
+
+.field-type {
+  .field-label {
+    font-weight: 600;
+    color: var(--igg-ink);
+  }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  textarea,
+  .rs__control {
+    border-radius: 8px;
+    border-color: var(--igg-line);
+
+    &:focus,
+    &:focus-within {
+      border-color: var(--igg-teal);
+      box-shadow: 0 0 0 3px rgb(0 164 153 / 14%);
+    }
+  }
+}
+
+/* Status pills read faster than plain text in the posts list. */
+.row-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dashboard {
+  background: var(--igg-canvas);
+
+  &__label {
+    color: var(--igg-muted);
+  }
+
+  .card {
+    border: 1px solid var(--igg-line);
+    border-radius: var(--igg-radius);
+    background: var(--igg-surface);
+    box-shadow: var(--igg-shadow-sm);
+    transition:
+      transform 0.18s ease,
+      box-shadow 0.18s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--igg-shadow-md);
+    }
+
+    h3 {
+      color: var(--igg-navy);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Custom dashboard overview
+ * ------------------------------------------------------------------ */
+
+.igg-dash {
+  margin-bottom: 34px;
+  padding: 28px;
+  background:
+    radial-gradient(circle at 92% 8%, rgb(0 164 153 / 10%), transparent 46%),
+    var(--igg-surface);
+  border: 1px solid var(--igg-line);
+  border-radius: 16px;
+  box-shadow: var(--igg-shadow-sm);
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  &__eyebrow {
+    margin: 0 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--igg-teal-dark);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--igg-navy);
+  }
+
+  &__subtitle {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--igg-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    &--primary {
+      background: var(--igg-navy);
+      color: #ffffff;
+      border: 1px solid var(--igg-navy);
+
+      &:hover {
+        background: var(--igg-navy-mid);
+        border-color: var(--igg-navy-mid);
+      }
+    }
+
+    &--ghost {
+      background: transparent;
+      color: var(--igg-navy);
+      border: 1px solid var(--igg-line);
+
+      &:hover {
+        border-color: var(--igg-teal);
+        color: var(--igg-teal-dark);
+      }
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  &__hint {
+    margin: 18px 0 0;
+    font-size: 13px;
+    color: var(--igg-muted);
+
+    a {
+      color: var(--igg-teal-dark);
+      font-weight: 600;
+    }
+  }
+}
+
+.igg-stat {
+  padding: 18px 20px;
+  border: 1px solid var(--igg-line);
+  border-radius: var(--igg-radius);
+  background: var(--igg-canvas);
+
+  &__value {
+    display: block;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--igg-navy);
+  }
+
+  &__label {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--igg-muted);
+  }
+
+  &--teal {
+    box-shadow: inset 3px 0 0 var(--igg-teal);
+  }
+  &--gold {
+    box-shadow: inset 3px 0 0 var(--igg-gold);
+  }
+  &--navy {
+    box-shadow: inset 3px 0 0 var(--igg-navy-mid);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Shared small controls
+ * ------------------------------------------------------------------ */
+
+.igg-listbar {
+  margin-bottom: 18px;
+}
+
+.igg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &--primary {
+    background: var(--igg-navy);
+    color: #ffffff;
+    border: 1px solid var(--igg-navy);
+
+    &:hover {
+      background: var(--igg-navy-mid);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--igg-navy);
+    border: 1px solid var(--igg-line);
+
+    &:hover {
+      border-color: var(--igg-teal);
+      color: var(--igg-teal-dark);
+    }
+  }
+}
+
+/* Delete action inside the users table's Actions column. */
+.igg-row-delete {
+  padding: 4px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #dc2626;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fee2e2;
+  }
+}
+
+.igg-nav-danger {
+  padding: 8px 16px;
+  margin-top: 4px;
+
+  &__link {
+    display: block;
+    padding: 7px 8px;
+    border: 1px solid rgb(229 72 77 / 32%);
+    border-radius: 8px;
+    font-size: 12px;
+    text-align: center;
+    text-decoration: none;
+    color: #ff8a8d;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgb(229 72 77 / 12%);
+      color: #ffb3b5;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard .card,
+  .igg-dash__btn,
+  .igg-btn,
+  .igg-nav-danger__link {
+    transition: none;
+  }
+}

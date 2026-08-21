@@ -1,35 +1,20 @@
 import Link from 'next/link'
 
+/**
+ * Secondary actions below the login form. Styling comes from
+ * (payload)/custom.scss rather than inline style objects so the links pick up
+ * the shared palette.
+ */
 export default function AfterLogin() {
   return (
-    <>
-      <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13 }}>
-        <Link href="/forgot-password" style={{ color: 'inherit' }}>
-          Forgot your password?
-        </Link>
-      </p>
+    <div className="login__secondary">
+      <Link href="/forgot-password" className="login__secondary-link">
+        Forgot your password?
+      </Link>
 
-      <div
-        style={{
-          textAlign: 'center',
-          marginBottom: '8px',
-          fontSize: '13px',
-          color: '#888',
-        }}
-      >
-        New user?{' '}
-        <Link
-          href="/signup"
-          style={{
-            color: '#1a1a1a',
-            fontWeight: '600',
-            textDecoration: 'none',
-            borderBottom: '1px solid #1a1a1a',
-          }}
-        >
-          Sign up
-        </Link>
-      </div>
-    </>
+      <p className="login__secondary-note">
+        New here? <Link href="/signup">Request an account</Link>
+      </p>
+    </div>
   )
 }

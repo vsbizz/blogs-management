@@ -1,20 +1,13 @@
 'use client'
 
-// src/components/AdminDeleteUsers.tsx
-//
-// Add to Users collection:
-//   admin.components.beforeListTable: ['@/components/AdminDeleteUsers#default']
-//
-// This renders ABOVE the Payload users table.
-// It shows a floating modal when admin clicks "Delete" on any user row
-// by listening to a custom window event dispatched from the table rows below.
-// But since we can't modify Payload's table rows directly, this component
-// ALSO attaches a MutationObserver that finds every row in the users table
-// and injects a custom delete button, hiding the 3-dot menu's delete option.
+// Renders above the users table (admin.components.beforeListTable) and owns the
+// transfer-then-delete modal. The Delete button itself is a real table column,
+// UserRowActions, which dispatches DELETE_USER_EVENT for this component to catch.
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '@payloadcms/ui'
+import { DELETE_USER_EVENT, type DeleteUserEventDetail } from './UserRowActions'
 
 type TransferUser = { id: number; email: string; name?: string | null }
 
@@ -30,78 +23,26 @@ export default function AdminDeleteUsers() {
   const [postCount, setPostCount] = useState(0)
   const [submitting, setSubmitting] = useState(false)
   const [mounted, setMounted] = useState(false)
-  const observerRef = useRef<MutationObserver | null>(null)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // ── Inject custom delete buttons into Payload's user table rows ────────────
+  // Listen for the delete request dispatched by the UserRowActions cell.
+  // This used to be a MutationObserver that scanned every <tr> on the page and
+  // appended a button into the last table cell, which put it inside the Status
+  // column.
   useEffect(() => {
     if (!mounted) return
     if (!cu || (cu.role !== 'admin' && cu.role !== 'master-admin')) return
 
-    const injectButtons = () => {
-      // Find all table rows that have a link to /admin/collections/users/{id}
-      const rows = document.querySelectorAll('tr')
-      rows.forEach((row) => {
-        // Skip if already processed
-        if (row.dataset.transferInjected) return
-
-        const link = row.querySelector('a[href*="/admin/collections/users/"]') as HTMLAnchorElement
-        if (!link) return
-
-        const match = link.href.match(/\/admin\/collections\/users\/(\d+)/)
-        if (!match) return
-
-        const userId = Number(match[1])
-        // Don't show delete for own account
-        if (userId === cu?.id) return
-
-        row.dataset.transferInjected = 'true'
-
-        // Get user name from the row
-        const userName = link.textContent?.trim() || `User #${userId}`
-
-        // Find the actions cell (last cell, where 3-dot menu is)
-        const cells = row.querySelectorAll('td')
-        if (cells.length === 0) return
-        const lastCell = cells[cells.length - 1]
-
-        // Create our delete button
-        const btn = document.createElement('button')
-        btn.textContent = 'Delete'
-        btn.setAttribute('data-transfer-delete', 'true')
-        btn.style.cssText = `
-          margin-left: 8px;
-          padding: 4px 12px;
-          border: 1px solid #fecaca;
-          border-radius: 4px;
-          background: #fef2f2;
-          color: #dc2626;
-          font-size: 12px;
-          font-weight: 500;
-          cursor: pointer;
-          font-family: inherit;
-        `
-        btn.onclick = (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          openModal(userId, userName)
-        }
-
-        lastCell.appendChild(btn)
-      })
+    const handler = (event: Event) => {
+      const { userId, userName } = (event as CustomEvent<DeleteUserEventDetail>).detail
+      openModal(userId, userName)
     }
 
-    // Run once and observe for DOM changes (pagination, filters)
-    injectButtons()
-    observerRef.current = new MutationObserver(injectButtons)
-    observerRef.current.observe(document.body, { childList: true, subtree: true })
-
-    return () => {
-      observerRef.current?.disconnect()
-    }
+    window.addEventListener(DELETE_USER_EVENT, handler)
+    return () => window.removeEventListener(DELETE_USER_EVENT, handler)
   }, [mounted, cu])
 
   const openModal = async (userId: number, userName: string) => {

@@ -1,26 +1,21 @@
 'use client'
 
+import { getBlogLink } from '@/lib/siteUrls'
+
+/**
+ * Shortcut from the posts list to the blog.
+ *
+ * Labelled by destination: the CMS serves its own `/blog` preview route, so
+ * calling that "live" was misleading. When NEXT_PUBLIC_PUBLIC_SITE_URL is set
+ * this points at the real site instead.
+ */
 export default function ViewAllBlogsButton() {
+  const { href, isLive } = getBlogLink()
+
   return (
-    <div style={{ marginBottom: 20 }}>
-      <a
-        href="/blog"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 13,
-          fontWeight: 500,
-          color: '#fff',
-          background: '#1a1a1a',
-          padding: '9px 20px',
-          borderRadius: 6,
-          textDecoration: 'none',
-        }}
-      >
-        View All Blogs
+    <div className="igg-listbar">
+      <a href={href} target="_blank" rel="noopener noreferrer" className="igg-btn igg-btn--ghost">
+        {isLive ? 'View live blog' : 'Preview blog'}
       </a>
     </div>
   )

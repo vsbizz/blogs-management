@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { usePathname } from 'next/navigation'
+import { useAuth } from '@payloadcms/ui'
 
 type ApprovalRequest = {
   id: string | number
@@ -19,6 +20,12 @@ export default function FloatingApprovalCard() {
   const [processing, setProcessing] = useState<'approved' | 'rejected' | null>(null)
   const [hiddenRequestId, setHiddenRequestId] = useState<string | number | null>(null)
   const pathname = usePathname()
+  const { user } = useAuth()
+
+  // Only admins can read user-approvals. Without this gate every author polled
+  // the endpoint every 5 seconds and got a 403 each time, forever.
+  const canReviewApprovals =
+    (user as any)?.role === 'admin' || (user as any)?.role === 'master-admin'
 
   useEffect(() => {
     setMounted(true)
@@ -36,8 +43,6 @@ export default function FloatingApprovalCard() {
 
       const data = await res.json()
 
-      console.log('FLOATING CARD APPROVAL DATA:', data)
-
       const latestRequest = data?.docs?.[0] || null
 
       setRequest(latestRequest)
@@ -48,16 +53,16 @@ export default function FloatingApprovalCard() {
   }
 
   useEffect(() => {
-    console.log('FLOATING CARD MOUNTED ✅')
+    if (!canReviewApprovals) return
 
     fetchLatestPendingRequest()
 
     const interval = setInterval(() => {
       fetchLatestPendingRequest()
-    }, 5000)
+    }, 30000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [canReviewApprovals])
 
   const handleAction = async (status: 'approved' | 'rejected') => {
     if (!request) return
@@ -98,6 +103,7 @@ export default function FloatingApprovalCard() {
     }
   }
   if (!mounted) return null
+  if (!canReviewApprovals) return null
 
   // Hide floating card on User Approvals page
   if (

@@ -1,48 +1,26 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useDocumentInfo } from '@payloadcms/ui'
+import { getBlogLink } from '@/lib/siteUrls'
 
+/**
+ * "View on site" link in the post edit view.
+ *
+ * Reads slug and status straight from the form context. The previous version
+ * fetched /api/posts/:id on mount to get the same two fields, which was an
+ * extra round trip and went stale as soon as the editor changed the status.
+ */
 export default function ViewOnSiteButton() {
-  const { id } = useDocumentInfo()
-  const [slug, setSlug] = useState<string | null>(null)
-  const [status, setStatus] = useState<string | null>(null)
+  const { data } = useDocumentInfo()
+  const doc = data as { slug?: string; status?: string } | undefined
 
-  useEffect(() => {
-    if (!id) return
-    fetch(`/api/posts/${id}?depth=0`)
-      .then((r) => r.json())
-      .then((data) => {
-        setSlug(data?.slug || null)
-        setStatus(data?.status || null)
-      })
-      .catch(() => {})
-  }, [id])
+  if (!doc?.slug || doc.status !== 'published') return null
 
-  // Hide if not published or no slug
-  if (!slug || status !== 'published') return null
+  const { href, isLive } = getBlogLink(doc.slug)
 
   return (
-    <div>
-      <a
-        href={`/blog/${slug}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 13,
-          fontWeight: 500,
-          color: '#fff',
-          background: '#1a1a1a',
-          padding: '9px 20px',
-          borderRadius: 6,
-          textDecoration: 'none',
-        }}
-      >
-        View on Site
-      </a>
-    </div>
+    <a href={href} target="_blank" rel="noopener noreferrer" className="igg-btn igg-btn--ghost">
+      {isLive ? 'View on site' : 'Preview post'}
+    </a>
   )
 }

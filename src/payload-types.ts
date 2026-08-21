@@ -159,6 +159,9 @@ export interface User {
  */
 export interface Media {
   id: number;
+  /**
+   * Describes the image for screen readers and search engines.
+   */
   alt: string;
   /**
    * Cloudinary Media Information

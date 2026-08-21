@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { useAuth } from '@payloadcms/ui'
 
 type ApprovalRequest = {
   id: number | string
@@ -16,6 +17,12 @@ export default function UserApprovalNotifications() {
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | number | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const { user } = useAuth()
+
+  // user-approvals is admin-only; polling it as an author just 403s on a loop.
+  const canReviewApprovals =
+    (user as any)?.role === 'admin' || (user as any)?.role === 'master-admin'
+
 
   const fetchRequests = async () => {
     try {
@@ -47,14 +54,19 @@ export default function UserApprovalNotifications() {
   }
 
   useEffect(() => {
+    if (!canReviewApprovals) {
+      setLoading(false)
+      return
+    }
+
     fetchRequests()
 
     const fetchInterval = setInterval(() => {
       fetchRequests()
-    }, 8000)
+    }, 30000)
 
     return () => clearInterval(fetchInterval)
-  }, [])
+  }, [canReviewApprovals])
 
   useEffect(() => {
     if (requests.length <= 1) return
@@ -112,6 +124,8 @@ export default function UserApprovalNotifications() {
   }
 
   const activeRequest = requests[activeIndex]
+
+  if (!canReviewApprovals) return null
 
   if (loading) {
     return (

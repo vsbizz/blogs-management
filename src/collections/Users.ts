@@ -6,10 +6,29 @@ const isMasterAdmin = (user: any) => user?.role === 'master-admin'
 const isAdmin = (user: any) => user?.role === 'admin'
 const isUser = (user: any) => user?.role === 'user'
 
+/**
+ * Rows an admin may modify: everyone except master-admins and themselves.
+ * Self is excluded so an admin cannot change their own role or delete
+ * their own account through the users list.
+ */
 const nonMasterUsersOnly = (currentUserId?: string | number): Where => {
   if (currentUserId) {
     return {
       and: [{ role: { not_equals: 'master-admin' } }, { id: { not_equals: currentUserId } }],
+    }
+  }
+  return { role: { not_equals: 'master-admin' } }
+}
+
+/**
+ * Rows an admin may read: the same set as above, plus their own record.
+ * Reading self must stay allowed or `/api/users/me` and the account screens
+ * break.
+ */
+const readableByAdmin = (currentUserId?: string | number): Where => {
+  if (currentUserId) {
+    return {
+      or: [{ role: { not_equals: 'master-admin' } }, { id: { equals: currentUserId } }],
     }
   }
   return { role: { not_equals: 'master-admin' } }
@@ -22,7 +41,7 @@ const Users: CollectionConfig = {
 
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email', 'role', 'status'],
+    defaultColumns: ['name', 'email', 'role', 'status', 'rowActions'],
 
     hidden: ({ user }) => {
       const loggedInUser = user as any
@@ -323,8 +342,12 @@ const Users: CollectionConfig = {
     read: ({ req }) => {
       const user = req.user as any
       if (!user) return false
-      if (user.role === 'master-admin') return true
-      if (user.role === 'admin') return true
+      if (isMasterAdmin(user)) return true
+      // Admins manage contributors, not each other. This used to return `true`,
+      // which let one admin read every account including master-admins even
+      // though `update` already excluded them. `baseListFilter` hid those rows
+      // in the UI but the REST API still returned them.
+      if (isAdmin(user)) return readableByAdmin(user.id)
       return { id: { equals: user.id } } as Where
     },
 
@@ -357,6 +380,19 @@ const Users: CollectionConfig = {
       type: 'text',
       required: true,
       admin: { position: 'sidebar' },
+    },
+    {
+      // Virtual column that renders the row Delete action. Nothing is stored;
+      // it exists so the button gets its own column instead of being injected
+      // into the last cell, which put it inside Status.
+      name: 'rowActions',
+      type: 'ui',
+      label: 'Actions',
+      admin: {
+        components: {
+          Cell: '@/components/UserRowActions#default',
+        },
+      },
     },
     {
       name: 'role',

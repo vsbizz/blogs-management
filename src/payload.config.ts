@@ -18,18 +18,21 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     user: Users.slug,
+    // Light only: the brand palette is built for light backgrounds.
     theme: 'light',
     importMap: {
       baseDir: path.resolve(dirname),
     },
     components: {
       beforeLogin: ['@/components/BeforeLogin#default'],
+      beforeDashboard: ['@/components/DashboardOverview#default'],
       afterLogin: ['@/components/AfterLogin#default'],
+      // HideCloudinaryMediaInfo and HideDocId used to live here. They were not
+      // nav links at all: they injected CSS on mount and scraped the DOM. That
+      // styling now lives in (payload)/custom.scss, which applies before paint.
       afterNavLinks: [
-        '@/components/HideCloudinaryMediaInfo#default',
         '@/components/FloatingApprovalCard#default',
         '@/components/DeleteAccountLink#default',
-        '@/components/HideDocId#default',
       ],
     },
   },
@@ -37,7 +40,7 @@ export default buildConfig({
   email: resendAdapter({
     apiKey: process.env.RESEND_API_KEY!,
     defaultFromAddress: process.env.EMAIL_USER!,
-    defaultFromName: 'Your Blog',
+    defaultFromName: 'IGG Axion Blog',
   }),
 
   collections: [Users, Media, Posts, UserApprovals],
